@@ -19,22 +19,23 @@ def get_filters():
         else:
             print("\nYou have selected " + city + ". Lets continue with the next selection\n")
             while True:
-                month_name = input("\nEnter the month you wish to explore : (Type all or january,february....june)\n").lower()
+                month_name = input("\nEnter the month you wish to explore.\n(Type all or january,february,march,april,may,june)\n").lower()
                 if month_name not in months:
                     print("\nYou entered the wrong month!\n")
                     continue
                 else:
                     print("\nYou have selected " + month_name + ". Lets continue with the next selection\n")
                     while True:
-                        day = input("\nEnter the day of the week you wish to explore: (Type all or sunday,monday....)\n").lower()
+                        day = input("\nEnter the day of the week you wish to explore.\n(Type all or sunday,monday,tuesday,wednesday,thursday,friday,saturday)\n").lower()
                         if day not in days:
                             print("\nYou have entered the wrong day!\n")
                         else:
                             print("\nYou have selected " + day +".")
                             print('-'*40)
-                            return city,month_name,day
-#print(get_filters())
+                        return city,month_name,day
 
+
+#print(get_filters())
 def load_data(city,month,day):
     # load data file into a dataframe
     df = pd.read_csv(CITY_DATA[city])
@@ -60,7 +61,7 @@ def load_data(city,month,day):
         if day != 'all':
             #filter by day of week to create the new dataframe
             df = df[df['day_of_week'] == day.title()]
-            return df
+    return df
 
 def time_stats(df):
     print("\n Calculating the most frequent times of travel...\n")
@@ -97,7 +98,7 @@ def station_stats(df):
     # TO DO: display most common trip from start to end (i.e., most frequent combination of start station and end station)
     df['Start to End'] = df['Start Station'].str.cat(df['End Station'],sep = ' To ')
     combo = df['Start to End'].mode()[0]
-    print("\n The most frequent combination of start and end stations from the filtered data are :\n" + combo)
+    print("\nThe most frequent combination of start and end stations from the filtered data are :\n" + combo)
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
@@ -107,11 +108,11 @@ def trip_duration_starts(df):
 
     # TO DO: display total travel time
     total_travel_time = df['Trip Duration'].sum()
-    print("\nThe total travel time from the filtered data is\n" +str(total_travel_time))
+    print("\nTotal travel time for the filtered data is:\n" +str(total_travel_time))
 
     # TO DO: display mean travel time
     mean_travel_time = df['Trip Duration'].mean()
-    print("\nThe mean travel time for the filtered data is\n" + str(mean_travel_time))
+    print("\nMean travel time for the filtered data is:\n" + str(mean_travel_time))
     print("\nThis took %s seconds." % (time.time() - start_time))
     print('-'*40)
 
@@ -122,16 +123,16 @@ def user_stats(df):
 
     # TO DO: Display counts of user types
     user_types = df['User Type'].value_counts()
-    print("\nThe user type count from the filtered data is\n" + str(user_types))
+    print("\nThe user type count from the filtered data is:\n" + str(user_types))
 
     # TO DO: Display counts of gender
     #gender_count = df['Gender'].value_counts()
     #print("\n Gender count\n" + str(gender_count))
     try:
         gender_count = df['Gender'].value_counts()
-        print("\n Gender count\n" + str(gender_count))
+        print("\nGender count\n" + str(gender_count))
     except KeyError:
-        print("\n Gender data missing in certain columns of the filtered data\n")
+        print("\nGender data is missing in certain columns of the filtered data\n")
 
     # TO DO: Display earliest, most recent, and most common year of birth
     try:
@@ -142,7 +143,7 @@ def user_stats(df):
         print("\nRecent birth year from the filtered data:     " + str(recent_birth))
         print("\nCommon birth year from the filtered data:     " + str(common_birth))
     except KeyError:
-        print("\nBirth Year data missing in certain columns of the filtered data")
+        print("\nBirth Year data is missing in certain columns of the filtered data")
         print("\nThis took %s seconds." % (time.time() - start_time))
         print('-'*40)
 
@@ -152,15 +153,14 @@ def display_data(df):
     Displays raw data on user request
     """
     next = 0
-    rdata = input("\nWould you like to view raw data: enter 'yes' to view data\n").lower()
-    while rdata == "yes":
-        print(df.iloc[0:5])
+    print(df.head())
+    while True:
+        next_data = input("\nWould you like to view the next 5 rows of data. Enter 'yes' to view data or 'no' to exit\n").lower()
         next += 5
-        next_data = input("\nWould you like to view the next 5 rows of data: enter 'yes' to view data\n").lower()
         if next_data == "yes":
             print(df.iloc[next:next+5])
         else:
-            print("\nYou have entered a respose other than 'yes'.\n")
+            print("\nYou chose to exit.Restarting....\n")
             break
 
 def main():
@@ -171,7 +171,13 @@ def main():
         station_stats(df)
         trip_duration_starts(df)
         user_stats(df)
-        display_data(df)
+        while True:
+            rdata = input("\nWould you like to view raw data: enter 'yes' to view data or 'no' to exit\n").lower()
+            if rdata != "yes":
+                break
+            else:
+                display_data(df)
+                break
         restart = input('\nWould you like to start from the beginning? Enter yes or no.\n')
         if restart.lower() != 'yes':
             break
